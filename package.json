@@ -22,20 +22,14 @@
   ],
   "scripts": {
     "build": "tsc",
-    "build:e2e-test": "tsc -b e2e-test",
     "format": "prettier --write \"**/*.ts\"",
     "format:check": "prettier --check \"**/*.ts\"",
-    "soiagen": "npm run build && soiac -r ./e2e-test",
-    "test": "npm run soiagen && npm run build:e2e-test && mocha"
+    "soiagen": "npm run build && soiac -r ./e2e-test"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
-    "@types/mocha": "^10.0.6",
     "@types/node": "^20.11.5",
-    "buckwheat": "^1.1.2",
-    "mocha": "^10.2.0",
     "prettier": "^3.2.4",
-    "soia": "^1.0.44",
     "soiac": "^1.0.17",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
