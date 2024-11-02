@@ -27,10 +27,11 @@ jobs:
       - run: npm run format:check
       - run: npm run build
       - run: npm run soiagen
-      - run: cd e2e-test
       - name: Install dependencies
         run: |
+          cd e2e-test
           python -m pip install --upgrade pip
           pip install build
       - run: |
+          cd e2e-test
           python3 -m unittest tests/**.py
