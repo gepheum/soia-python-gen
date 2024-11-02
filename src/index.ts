@@ -345,7 +345,7 @@ class PythonModuleCodeGenerator {
       if (removedNumbers.length) {
         const removedNumbersStr = removedNumbers
           .map((n) => `${n}, `)
-          .join()
+          .join("")
           .trimEnd();
         this.pushLine(`   removed_numbers=(${removedNumbersStr}),`);
       }
