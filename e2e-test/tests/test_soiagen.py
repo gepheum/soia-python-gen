@@ -22,4 +22,3 @@ class SoiagenTestCase(unittest.TestCase):
     def test_struct_with_name_conflicts(self):
         t = True_(self=())
         self.assertEqual(t.self, ())
-        f: str = t.self
