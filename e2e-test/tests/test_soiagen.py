@@ -1,7 +1,7 @@
 import unittest
 
 from soiagen.full_name import FullName
-from soiagen.structs import Foo, True_
+from soiagen.structs import Color, Foo, Triangle, True_
 
 
 class SoiagenTestCase(unittest.TestCase):
@@ -12,8 +12,12 @@ class SoiagenTestCase(unittest.TestCase):
 
     def test_nested_struct(self):
         bar = Foo.Bar(bar="Bar")
-        self.assertEqual(bar.foos, ())
+        self.assertEqual(bar.foos, None)
         self.assertEqual(bar.bar, "Bar")
+
+    def test_triangle_default(self):
+        self.assertEqual(Triangle.DEFAULT.color, Color.DEFAULT)
+        self.assertEqual(Triangle.DEFAULT.points, ())
 
     def test_struct_with_name_conflicts(self):
         t = True_(self=())
