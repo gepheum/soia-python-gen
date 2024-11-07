@@ -2,12 +2,15 @@ import { ClassName, getClassName } from "./class_speller.js";
 import { PyType } from "./py_type.js";
 import type { Module, RecordKey, RecordLocation, ResolvedType } from "soiac";
 
-export type TypeFlavor = "frozen" | "maybe-mutable" | "mutable";
+export type TypeFlavor = "initializer" | "frozen" | "maybe-mutable" | "mutable";
 
 /**
  * Transforms a type found in a `.soia` file into a Python type.
  *
  * The flavors are:
+ *   · initializer
+ *       The value can be passed by parameter to the `create` method of a frozen
+ *       class or the constructor of a mutable class.
  *   · frozen:
  *       The type is deeply immutable. All the fields of a frozen class are also
  *       frozen.
@@ -26,7 +29,7 @@ export class TypeSpeller {
 
   getPyType(
     type: ResolvedType,
-    flavor: "frozen" | "mutable",
+    flavor: "initializer" | "frozen" | "mutable",
     allRecordsFrozen?: undefined,
   ): PyType;
 
@@ -58,7 +61,7 @@ export class TypeSpeller {
             return PyType.quote(
               allRecordsFrozen ? className : `${className}.OrMutable`,
             );
-          } else if (flavor === "mutable") {
+          } else if (flavor === "initializer" || flavor === "mutable") {
             return PyType.quote(`${className}.Mutable`);
           } else {
             const _: never = flavor;
@@ -66,7 +69,7 @@ export class TypeSpeller {
           }
         }
         // An enum.
-        if (flavor === "frozen" || flavor === "maybe-mutable") {
+        if (flavor === "initializer" || flavor === "frozen" || flavor === "maybe-mutable") {
           return PyType.quote(className);
         } else if (flavor === "mutable") {
           // Enum types are immutable.
@@ -77,14 +80,17 @@ export class TypeSpeller {
         }
       }
       case "array": {
-        const frozenItemType = this.getPyType(
-          type.item,
-          "frozen",
-          allRecordsFrozen,
-        );
         const maybeMutableItemType = this.getPyType(
           type.item,
           "maybe-mutable",
+          allRecordsFrozen,
+        );
+        if (flavor === "initializer") {
+          return PyType.of(`collections.abc.Iterable[${maybeMutableItemType}]`);
+        }
+        const frozenItemType = this.getPyType(
+          type.item,
+          "frozen",
           allRecordsFrozen,
         );
         let tupleType: PyType;

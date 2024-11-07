@@ -91,6 +91,7 @@ class PythonModuleCodeGenerator {
   }
 
   private writeImports(): void {
+    this.pushLine("import collections.abc");
     this.pushLine("import typing");
     this.pushLine();
     for (const path of Object.keys(this.inModule.pathToImportedNames)) {
@@ -145,7 +146,7 @@ class PythonModuleCodeGenerator {
       const allRecordsFrozen = field.isRecursive;
       const pyType = this.typeSpeller.getPyType(
         field.type!,
-        "maybe-mutable",
+        "initializer",
         allRecordsFrozen,
       );
       const attribute = structFieldToAttr(field.name.text);
@@ -229,7 +230,7 @@ class PythonModuleCodeGenerator {
     this.pushLine();
     for (const valueField of valueFields) {
       const name = valueField.name.text;
-      const pyType = typeSpeller.getPyType(valueField.type!, "frozen");
+      const pyType = typeSpeller.getPyType(valueField.type!, "initializer");
       this.pushLine("@staticmethod");
       this.pushLine(
         `def wrap_${name}(value: ${pyType}) -> "${qualifiedName}": ...`,
@@ -371,7 +372,7 @@ class PythonModuleCodeGenerator {
           }
           const attribute = structFieldToAttr(fieldName);
           if (attribute !== fieldName) {
-            this.pushLine(`     _attribute=${attribute},`);
+            this.pushLine(`     _attribute="${attribute}",`);
           }
           this.pushLine("    ),");
         }
