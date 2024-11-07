@@ -431,8 +431,15 @@ class PythonModuleCodeGenerator {
     switch (type.kind) {
       case "array": {
         const itemSpec = this.typeToSpec(type.item);
-        // TODO: add key_attributes
-        return `_spec.ArrayType(${itemSpec})`;
+        let keyArg = "";
+        if (type.key) {
+          const attributes = type.key.fieldNames
+            .map((n) => `"${structFieldToAttr(n.text)}", `)
+            .join("")
+            .trimEnd();
+          keyArg = `, (${attributes})`;
+        }
+        return `_spec.ArrayType(${itemSpec}${keyArg})`;
       }
       case "optional": {
         const otherSpec = this.typeToSpec(type.other);

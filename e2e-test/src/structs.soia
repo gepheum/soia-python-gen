@@ -129,4 +129,7 @@ struct Floats {
 
 struct True {
   self: [True];
+  to_frozen: bool?;
+  to_mutable: bool?;
+  and: bool?;
 }

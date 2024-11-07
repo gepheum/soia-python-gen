@@ -87,7 +87,15 @@ export class TypeSpeller {
           "maybe-mutable",
           allRecordsFrozen,
         );
-        const tupleType = PyType.of(`tuple[${frozenItemType}, ...]`);
+        let tupleType: PyType;
+        if (type.key) {
+          const keyType = this.getPyType(type.key.keyType, "frozen");
+          tupleType = PyType.of(
+            `soialib.KeyedItems[${frozenItemType}, ${keyType}]`,
+          );
+        } else {
+          tupleType = PyType.of(`tuple[${frozenItemType}, ...]`);
+        }
         const listType = PyType.of(`list[${maybeMutableItemType}]`);
         if (flavor === "frozen") {
           return tupleType;
