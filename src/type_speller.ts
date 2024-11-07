@@ -69,7 +69,11 @@ export class TypeSpeller {
           }
         }
         // An enum.
-        if (flavor === "initializer" || flavor === "frozen" || flavor === "maybe-mutable") {
+        if (
+          flavor === "initializer" ||
+          flavor === "frozen" ||
+          flavor === "maybe-mutable"
+        ) {
           return PyType.quote(className);
         } else if (flavor === "mutable") {
           // Enum types are immutable.
