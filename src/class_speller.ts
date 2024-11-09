@@ -17,7 +17,6 @@ export function getClassName(
   origin: Module,
 ): ClassName {
   const { recordAncestors } = record;
-  //   const isNested = recordAncestors.length >= 2;
   const parts: string[] = [];
   for (let i = 0; i < recordAncestors.length; ++i) {
     const record = recordAncestors[i]!;
