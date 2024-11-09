@@ -119,12 +119,12 @@ export class TypeSpeller {
         }
       }
       case "optional": {
-        const valueType = this.getPyType(type.other, flavor, allRecordsFrozen);
+        const otherType = this.getPyType(type.other, flavor, allRecordsFrozen);
         if (flavor === "mutable") {
           // The generated mutableX() methods cannot return null.
-          return valueType;
+          return otherType;
         }
-        return PyType.union([valueType, PyType.NONE]);
+        return PyType.union([otherType, PyType.NONE]);
       }
       case "primitive": {
         if (flavor === "mutable") {
