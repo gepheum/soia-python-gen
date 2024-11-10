@@ -26,7 +26,7 @@ class PythonCodeGenerator implements CodeGenerator<Config> {
     const outputFiles: CodeGenerator.OutputFile[] = [];
     for (const module of input.modules) {
       outputFiles.push({
-        path: `${module.path.replace(/\.soia$/, "")}.py`,
+        path: module.path.replace(/\.soia$/, ".py"),
         code: new PythonModuleCodeGenerator(
           module,
           recordMap,
