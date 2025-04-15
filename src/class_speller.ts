@@ -21,11 +21,11 @@ export function getClassName(
   for (let i = 0; i < recordAncestors.length; ++i) {
     const record = recordAncestors[i]!;
     let name = record.name.text;
-    const parentIsStruct =
-      i > 0 && recordAncestors[i - 1]!.recordType === "struct";
+    const parentType = i > 0 ? recordAncestors[i - 1]!.recordType : undefined;
     if (
       PY_UPPER_CAMEL_KEYWORDS.has(name) ||
-      (parentIsStruct && STRUCT_NESTED_TYPE_NAMES.has(name))
+      (parentType === "struct" && STRUCT_NESTED_TYPE_NAMES.has(name)) ||
+      (parentType === "enum" && ENUM_NESTED_TYPE_NAMES.has(name))
     ) {
       name += "_";
     }
@@ -60,3 +60,6 @@ const STRUCT_NESTED_TYPE_NAMES: ReadonlySet<string> = new Set([
   "Mutable",
   "OrMutable",
 ]);
+
+/** Generated types nested within an enum class. */
+const ENUM_NESTED_TYPE_NAMES: ReadonlySet<string> = new Set(["Kind"]);

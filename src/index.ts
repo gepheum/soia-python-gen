@@ -107,6 +107,7 @@ class PythonModuleCodeGenerator {
       "from soialib import module_initializer as _module_initializer",
     );
     this.pushLine("from soialib import spec as _spec");
+    this.pushLine("from soialib._ import _");
   }
 
   private writeClassesForRecords(
@@ -150,13 +151,14 @@ class PythonModuleCodeGenerator {
         allRecordsFrozen,
       );
       const attribute = structFieldToAttr(field.name.text);
-      this.pushLine(` ${attribute}: ${pyType} = typing.cast(${pyType}, ...),`);
+      const defaultValue = getDefaultValue(field.type!);
+      this.pushLine(` ${attribute}: ${pyType} = ${defaultValue},`);
     }
     this.pushLine("): ...");
-    this.pushLine();
     for (const field of struct.record.fields) {
       const attribute = structFieldToAttr(field.name.text);
       const pyType = this.typeSpeller.getPyType(field.type!, "frozen");
+      this.pushLine();
       this.pushLine("@property");
       this.pushLine(`def ${attribute}(self) -> ${pyType}: ...`);
     }
@@ -179,7 +181,8 @@ class PythonModuleCodeGenerator {
         allRecordsFrozen,
       );
       const attribute = structFieldToAttr(field.name.text);
-      this.pushLine(` ${attribute}: ${pyType},`);
+      const defaultValue = getDefaultValue(field.type!);
+      this.pushLine(` ${attribute}: ${pyType} = ${defaultValue},`);
     }
     this.pushLine("): ...");
     this.pushLine();
@@ -202,10 +205,10 @@ class PythonModuleCodeGenerator {
     );
     this.pushLine();
     this.pushLine(
-      `DEFAULT: typing.Final = typing.cast("${qualifiedName}", ...)`,
+      `DEFAULT: typing.Final["${qualifiedName}"] = _`,
     );
     this.pushLine(
-      `SERIALIZER: typing.Final = typing.cast(soialib.Serializer["${qualifiedName}"], ...)`,
+      `SERIALIZER: typing.Final[soialib.Serializer["${qualifiedName}"]] = _`,
     );
   }
 
@@ -219,12 +222,12 @@ class PythonModuleCodeGenerator {
     this.pushLine("@typing.final");
     this.pushLine(`class ${className.name}:`);
     this.pushLine(
-      `UNKNOWN: typing.Final = typing.cast("${qualifiedName}", ...)`,
+      `UNKNOWN: typing.Final["${qualifiedName}"] = _`,
     );
     for (const constantField of constantFields) {
       const attribute = enumValueFieldToAttr(constantField.name.text);
       this.pushLine(
-        `${attribute}: typing.Final = typing.cast("${qualifiedName}", ...)`,
+        `${attribute}: typing.Final["${qualifiedName}"] = _`,
       );
     }
     this.pushLine();
@@ -243,9 +246,14 @@ class PythonModuleCodeGenerator {
     }
     this.pushLine();
     {
-      const kindType = ['typing.Literal["?"]']
-        .concat(fields.map((f) => `typing.Literal["${f.name.text}"]`))
-        .join(" | ");
+      const kindTypeArgs = ['"?"']
+        .concat(fields.map((f) => `"${f.name.text}"`))
+        .join(", ");
+      this.pushLine(`Kind: typing.TypeAlias = typing.Literal[${kindTypeArgs}]`);
+    }
+    {
+      const kindType = PyType.quote(`${qualifiedName}.Kind`);
+      this.pushLine();
       this.pushLine("@property");
       this.pushLine(`def kind(self) -> ${kindType}: ...`);
     }
@@ -255,6 +263,7 @@ class PythonModuleCodeGenerator {
       );
       typesInUnion.push(PyType.NONE);
       const valueType = PyType.union(typesInUnion);
+      this.pushLine();
       this.pushLine("@property");
       this.pushLine(`def value(self) -> ${valueType}: ...`);
     }
@@ -264,6 +273,7 @@ class PythonModuleCodeGenerator {
       const typesInUnion = [getVariantType("Unknown")].concat(
         fields.map((f) => getVariantType(f.name.text)),
       );
+      this.pushLine();
       this.pushLine("@property");
       this.pushLine(`def union(self) -> ${PyType.union(typesInUnion)}: ...`);
     }
@@ -277,7 +287,7 @@ class PythonModuleCodeGenerator {
     }
     this.pushLine();
     this.pushLine(
-      `SERIALIZER: typing.Final = typing.cast(soialib.Serializer["${qualifiedName}"], ...)`,
+      `SERIALIZER: typing.Final[soialib.Serializer["${qualifiedName}"]] = _`,
     );
   }
 
@@ -292,6 +302,7 @@ class PythonModuleCodeGenerator {
     this.pushLine(
       `def kind(self) -> typing.Literal["${kind || fieldName}"]: ...`,
     );
+    this.pushLine();
     this.pushLine("@property");
     this.pushLine(`def value(self) -> ${valueType}: ...`);
     this.dedent();
@@ -307,7 +318,7 @@ class PythonModuleCodeGenerator {
     const responseType = typeSpeller.getPyType(method.responseType!, "frozen");
     const methodType = `soialib.Method[${requestType}, ${responseType}]`;
     this.pushLine();
-    this.pushLine(`${varName}: typing.Final = typing.cast(${methodType}, ...)`);
+    this.pushLine(`${varName}: typing.Final[${methodType}] = _`);
   }
 
   private writeConstant(constant: Constant): void {
@@ -315,7 +326,7 @@ class PythonModuleCodeGenerator {
     const name = constant.name.text;
     const type = typeSpeller.getPyType(constant.type!, "frozen");
     this.pushLine();
-    this.pushLine(`${name}: typing.Final = typing.cast(${type}, ...)`);
+    this.pushLine(`${name}: typing.Final[${type}] = _`);
   }
 
   private writeInitModuleCall(): void {
@@ -501,6 +512,36 @@ function structFieldToAttr(fieldName: string): string {
 
 function enumValueFieldToAttr(fieldName: string): string {
   return STRUCT_GEN_UPPER_SYMBOLS.has(fieldName) ? `${fieldName}_` : fieldName;
+}
+
+function getDefaultValue(type: ResolvedType): string {
+  switch (type.kind) {
+    case "array":
+      return type.key ? "_" : "()";
+    case "optional":
+      return "None";
+    case "primitive": {
+      switch (type.primitive) {
+        case "bool":
+          return "False";
+        case "int32":
+        case "int64":
+        case "uint64":
+          return "0";
+        case "float32":
+        case "float64":
+          return "0.0";
+        case "string":
+          return '""';
+        case "bytes":
+          return 'b""';
+        case "timestamp":
+          return "soialib.Timestamp.EPOCH";
+      }
+    }
+    case "record":
+      return "_";
+  }
 }
 
 /** Python keywords in lower_case format. */

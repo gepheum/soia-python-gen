@@ -2,7 +2,12 @@ import { ClassName, getClassName } from "./class_speller.js";
 import { PyType } from "./py_type.js";
 import type { Module, RecordKey, RecordLocation, ResolvedType } from "soiac";
 
-export type TypeFlavor = "initializer" | "frozen" | "maybe-mutable" | "mutable";
+export type TypeFlavor =
+  | "initializer"
+  | "frozen"
+  | "maybe-mutable"
+  | "mutable"
+  | "kind";
 
 /**
  * Transforms a type found in a `.soia` file into a Python type.
@@ -29,7 +34,7 @@ export class TypeSpeller {
 
   getPyType(
     type: ResolvedType,
-    flavor: "initializer" | "frozen" | "mutable",
+    flavor: "initializer" | "frozen" | "mutable" | "kind",
     allRecordsFrozen?: undefined,
   ): PyType;
 
@@ -64,7 +69,7 @@ export class TypeSpeller {
           } else if (flavor === "initializer" || flavor === "mutable") {
             return PyType.quote(`${className}.Mutable`);
           } else {
-            const _: never = flavor;
+            const _: "kind" = flavor;
             throw TypeError();
           }
         }
@@ -75,6 +80,8 @@ export class TypeSpeller {
           flavor === "maybe-mutable"
         ) {
           return PyType.quote(className);
+        } else if (flavor === "kind") {
+          return PyType.quote(`${className}.Kind`);
         } else if (flavor === "mutable") {
           // Enum types are immutable.
           return PyType.NEVER;
@@ -99,7 +106,7 @@ export class TypeSpeller {
         );
         let tupleType: PyType;
         if (type.key) {
-          const keyType = this.getPyType(type.key.keyType, "frozen");
+          const keyType = this.getPyType(type.key.keyType, "kind");
           tupleType = PyType.of(
             `soialib.KeyedItems[${frozenItemType}, ${keyType}]`,
           );
@@ -114,7 +121,7 @@ export class TypeSpeller {
         } else if (flavor === "mutable") {
           return listType;
         } else {
-          const _: never = flavor;
+          const _: "kind" = flavor;
           throw TypeError();
         }
       }

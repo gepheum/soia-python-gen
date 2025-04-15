@@ -1,7 +1,8 @@
 import unittest
 
+from soiagen.enums import Weekday
 from soiagen.full_name import FullName
-from soiagen.structs import Color, Foo, Triangle, True_
+from soiagen.structs import Color, Foo, Item, Items, Triangle, True_
 
 
 class SoiagenTestCase(unittest.TestCase):
@@ -11,6 +12,14 @@ class SoiagenTestCase(unittest.TestCase):
         self.assertEqual(full_name.last_name, "Fibonacci")
         self.assertEqual(
             FullName.SERIALIZER.to_json_code(full_name),
+            '["Tyler","Fibonacci"]',
+        )
+
+    def test_full_name_mutable(self):
+        full_name = FullName.Mutable(first_name="Tyler")
+        full_name.last_name = "Fibonacci"
+        self.assertEqual(
+            FullName.SERIALIZER.to_json_code(full_name.to_frozen()),
             '["Tyler","Fibonacci"]',
         )
 
@@ -26,3 +35,28 @@ class SoiagenTestCase(unittest.TestCase):
     def test_struct_with_name_conflicts(self):
         t = True_(self=())
         self.assertEqual(t.self, ())
+
+    def test_keyed_arrays(self):
+        items = Items(
+            array_with_enum_key=[
+                Item(
+                    weekday=Weekday.MONDAY,
+                    bool=True,
+                ),
+                Item(
+                    weekday=Weekday.TUESDAY,
+                    bool=True,
+                ),
+            ]
+        )
+        self.assertEqual(
+            items.array_with_enum_key.find("TUESDAY"),
+            Item(
+                weekday=Weekday.TUESDAY,
+                bool=True,
+            ),
+        )
+        self.assertEqual(
+            items.array_with_enum_key.find("WEDNESDAY"),
+            None,
+        )

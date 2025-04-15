@@ -1,6 +1,6 @@
 {
   "name": "soia-python-gen",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "",
   "keywords": [],
   "repository": {
@@ -24,7 +24,8 @@
     "build": "tsc",
     "format": "prettier --write \"**/*.ts\"",
     "format:check": "prettier --check \"**/*.ts\"",
-    "soiagen": "npm run build && soiac -r ./e2e-test"
+    "soiagen": "npm run build && soiac -r ./e2e-test",
+    "test": "npm run soiagen && cd e2e-test && python3 -m pip install -r requirements.txt && python3 -m unittest tests/**.py && cd .."
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
