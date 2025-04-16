@@ -204,9 +204,7 @@ class PythonModuleCodeGenerator {
       `OrMutable: typing.TypeAlias = "${qualifiedName} | ${qualifiedName}.Mutable"`,
     );
     this.pushLine();
-    this.pushLine(
-      `DEFAULT: typing.Final["${qualifiedName}"] = _`,
-    );
+    this.pushLine(`DEFAULT: typing.Final["${qualifiedName}"] = _`);
     this.pushLine(
       `SERIALIZER: typing.Final[soialib.Serializer["${qualifiedName}"]] = _`,
     );
@@ -221,14 +219,10 @@ class PythonModuleCodeGenerator {
     const { qualifiedName } = className;
     this.pushLine("@typing.final");
     this.pushLine(`class ${className.name}:`);
-    this.pushLine(
-      `UNKNOWN: typing.Final["${qualifiedName}"] = _`,
-    );
+    this.pushLine(`UNKNOWN: typing.Final["${qualifiedName}"] = _`);
     for (const constantField of constantFields) {
       const attribute = enumValueFieldToAttr(constantField.name.text);
-      this.pushLine(
-        `${attribute}: typing.Final["${qualifiedName}"] = _`,
-      );
+      this.pushLine(`${attribute}: typing.Final["${qualifiedName}"] = _`);
     }
     this.pushLine();
     for (const valueField of valueFields) {
