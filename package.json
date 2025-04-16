@@ -24,7 +24,7 @@
     "build": "tsc",
     "format": "prettier --write \"**/*.ts\"",
     "format:check": "prettier --check \"**/*.ts\"",
-    "test": "npm run build && soiac -r ./e2e-test && cd e2e-test && poetry install && echo '$(poetry env info --path)/bin' >> $GITHUB_PATH && poetry run python -m unittest tests/**.py && cd .."
+    "test": "npm run build && soiac -r ./e2e-test && cd e2e-test && poetry install && poetry run python -m unittest tests/**.py && cd .."
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
