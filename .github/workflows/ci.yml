@@ -28,6 +28,8 @@ jobs:
         uses: abatilo/actions-poetry@v3
         with:
           poetry-version: ${{ matrix.poetry-version }}
+      # From https://github.com/jakebailey/pyright-action
+      - run: echo "$(poetry env info --path)/bin" >> $GITHUB_PATH
       - run: npm ci
       - run: npm run format:check
       - run: npm run test
