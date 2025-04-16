@@ -585,3 +585,4 @@ const STRUCT_GEN_UPPER_SYMBOLS: ReadonlySet<string> = new Set<string>([
   "SERIALIZER",
   "UNKNOWN",
 ]);
+
