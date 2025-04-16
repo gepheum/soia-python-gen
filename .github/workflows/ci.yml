@@ -11,8 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [18.x, 20.x]
+        node-version: [20.x]
         python-version: ["3.10", "3.11", "3.12"]
+        poetry-version: ["latest", "main"]
     steps:
       - uses: actions/checkout@v4
       - name: Use Node.js ${{ matrix.node-version }}
@@ -23,16 +24,13 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Run image
+        uses: abatilo/actions-poetry@v3
+        with:
+          poetry-version: ${{ matrix.poetry-version }}
       - run: npm ci
       - run: npm run format:check
-      - run: npm run build
-      - run: npm run soiagen
-      - name: Run e2e tests
-        run: |
-          cd e2e-test
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          python3 -m unittest tests/**.py
+      - run: npm run test
       - uses: jakebailey/pyright-action@v2
         with:
           pylance-version: latest-release
