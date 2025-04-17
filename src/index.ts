@@ -102,12 +102,10 @@ class PythonModuleCodeGenerator {
         `import soiagen.${path.replace(/\.soia$/, "").replace("/", ".")}`,
       );
     }
-    this.pushLine("import soialib");
+    this.pushLine("import soia");
     this.pushLine(
-      "from soialib import module_initializer as _module_initializer",
+      "from soia import _, _module_initializer, _spec",
     );
-    this.pushLine("from soialib import spec as _spec");
-    this.pushLine("from soialib._ import _");
   }
 
   private writeClassesForRecords(
@@ -206,7 +204,7 @@ class PythonModuleCodeGenerator {
     this.pushLine();
     this.pushLine(`DEFAULT: typing.Final["${qualifiedName}"] = _`);
     this.pushLine(
-      `SERIALIZER: typing.Final[soialib.Serializer["${qualifiedName}"]] = _`,
+      `SERIALIZER: typing.Final[soia.Serializer["${qualifiedName}"]] = _`,
     );
   }
 
@@ -281,7 +279,7 @@ class PythonModuleCodeGenerator {
     }
     this.pushLine();
     this.pushLine(
-      `SERIALIZER: typing.Final[soialib.Serializer["${qualifiedName}"]] = _`,
+      `SERIALIZER: typing.Final[soia.Serializer["${qualifiedName}"]] = _`,
     );
   }
 
@@ -310,7 +308,7 @@ class PythonModuleCodeGenerator {
       : methodName;
     const requestType = typeSpeller.getPyType(method.requestType!, "frozen");
     const responseType = typeSpeller.getPyType(method.responseType!, "frozen");
-    const methodType = `soialib.Method[${requestType}, ${responseType}]`;
+    const methodType = `soia.Method[${requestType}, ${responseType}]`;
     this.pushLine();
     this.pushLine(`${varName}: typing.Final[${methodType}] = _`);
   }
@@ -530,7 +528,7 @@ function getDefaultValue(type: ResolvedType): string {
         case "bytes":
           return 'b""';
         case "timestamp":
-          return "soialib.Timestamp.EPOCH";
+          return "soia.Timestamp.EPOCH";
       }
     }
     case "record":

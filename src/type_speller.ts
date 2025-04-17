@@ -108,7 +108,7 @@ export class TypeSpeller {
         if (type.key) {
           const keyType = this.getPyType(type.key.keyType, "kind");
           tupleType = PyType.of(
-            `soialib.KeyedItems[${frozenItemType}, ${keyType}]`,
+            `soia.KeyedItems[${frozenItemType}, ${keyType}]`,
           );
         } else {
           tupleType = PyType.of(`tuple[${frozenItemType}, ...]`);
