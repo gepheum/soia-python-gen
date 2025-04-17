@@ -103,9 +103,7 @@ class PythonModuleCodeGenerator {
       );
     }
     this.pushLine("import soia");
-    this.pushLine(
-      "from soia import _, _module_initializer, _spec",
-    );
+    this.pushLine("from soia import _, _module_initializer, _spec");
   }
 
   private writeClassesForRecords(
