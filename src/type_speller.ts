@@ -62,11 +62,11 @@ export class TypeSpeller {
         if (record.recordType === "struct") {
           if (flavor === "frozen" || allRecordsFrozen) {
             return PyType.quote(className);
-          } else if (flavor === "maybe-mutable") {
+          } else if (flavor === "maybe-mutable" || flavor === "initializer") {
             return PyType.quote(
               allRecordsFrozen ? className : `${className}.OrMutable`,
             );
-          } else if (flavor === "initializer" || flavor === "mutable") {
+          } else if (flavor === "mutable") {
             return PyType.quote(`${className}.Mutable`);
           } else {
             const _: "kind" = flavor;
