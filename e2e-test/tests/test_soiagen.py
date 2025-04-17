@@ -1,6 +1,7 @@
 import unittest
 
-from soiagen.enums import Weekday
+from soiagen.constants import ONE_CONSTANT
+from soiagen.enums import JsonValue, Weekday
 from soiagen.full_name import FullName
 from soiagen.structs import Color, Foo, Item, Items, Triangle, True_
 
@@ -59,4 +60,32 @@ class SoiagenTestCase(unittest.TestCase):
         self.assertEqual(
             items.array_with_enum_key.find("WEDNESDAY"),
             None,
+        )
+
+    def test_constant(self):
+        self.assertEqual(
+            ONE_CONSTANT,
+            JsonValue.wrap_array(
+                [
+                    JsonValue.wrap_boolean(True),
+                    JsonValue.wrap_number(3.14),
+                    JsonValue.wrap_string(
+                        "\n".join(
+                            [
+                                "",
+                                "        foo",
+                                "        bar",
+                            ]
+                        )
+                    ),
+                    JsonValue.wrap_object(
+                        [
+                            JsonValue.Pair(
+                                name="foo",
+                                value=JsonValue.NULL,
+                            ),
+                        ]
+                    ),
+                ]
+            ),
         )

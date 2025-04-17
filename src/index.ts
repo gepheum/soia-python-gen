@@ -424,6 +424,14 @@ class PythonModuleCodeGenerator {
     }
     this.pushLine(" ),");
     this.pushLine(" constants=(");
+    for (const constant of inModule.constants) {
+      const json_code = JSON.stringify(constant.valueAsDenseJson);
+      this.pushLine("  _spec.Constant(");
+      this.pushLine(`    name="${constant.name.text}",`);
+      this.pushLine(`    type=${this.typeToSpec(constant.type!)},`);
+      this.pushLine(`    json_code='${json_code.replace(/['\\]/g, "\\$&")}',`);
+      this.pushLine("  ),");
+    }
     this.pushLine(" ),");
     this.pushLine(" globals=globals(),");
     this.pushLine(")");
