@@ -129,6 +129,7 @@ class PythonModuleCodeGenerator {
   }
 
   private writeClassForStruct(struct: RecordLocation): void {
+    const {typeSpeller} = this;
     const { fields } = struct.record;
     const className = getClassName(struct, this.inModule);
     const { qualifiedName } = className;
@@ -141,7 +142,7 @@ class PythonModuleCodeGenerator {
     }
     for (const field of fields) {
       const allRecordsFrozen = field.isRecursive;
-      const pyType = this.typeSpeller.getPyType(
+      const pyType = typeSpeller.getPyType(
         field.type!,
         "initializer",
         allRecordsFrozen,
@@ -153,7 +154,7 @@ class PythonModuleCodeGenerator {
     this.pushLine("): ...");
     for (const field of struct.record.fields) {
       const attribute = structFieldToAttr(field.name.text);
-      const pyType = this.typeSpeller.getPyType(field.type!, "frozen");
+      const pyType = typeSpeller.getPyType(field.type!, "frozen");
       this.pushLine();
       this.pushLine("@property");
       this.pushLine(`def ${attribute}(self) -> ${pyType}: ...`);
@@ -171,7 +172,7 @@ class PythonModuleCodeGenerator {
     }
     for (const field of fields) {
       const allRecordsFrozen = field.isRecursive;
-      const pyType = this.typeSpeller.getPyType(
+      const pyType = typeSpeller.getPyType(
         field.type!,
         "maybe-mutable",
         allRecordsFrozen,
@@ -185,7 +186,7 @@ class PythonModuleCodeGenerator {
     for (const field of struct.record.fields) {
       const allRecordsFrozen = field.isRecursive;
       const attribute = structFieldToAttr(field.name.text);
-      const pyType = this.typeSpeller.getPyType(
+      const pyType = typeSpeller.getPyType(
         field.type!,
         "maybe-mutable",
         allRecordsFrozen,
@@ -193,6 +194,17 @@ class PythonModuleCodeGenerator {
       this.pushLine(`${attribute}: ${pyType}`);
     }
     this.pushLine();
+    for (const field of struct.record.fields) {
+      const fieldType = field.type!;
+      const {isRecursive} = field;
+      const mutableType = typeSpeller.getPyType(fieldType, "mutable");
+      const hasMutableGetter =
+          typeSpeller.getPyType(fieldType, "maybe-mutable", isRecursive) !== mutableType;
+      if (!hasMutableGetter) continue;
+      this.pushLine("@property");
+      this.pushLine(`def mutable_${field.name.text}(self) -> ${mutableType}: ...`);
+      this.pushLine();
+    }
     this.pushLine(`def to_frozen(self) -> "${qualifiedName}": ...`);
     this.dedent();
     this.pushLine();
@@ -357,13 +369,10 @@ class PythonModuleCodeGenerator {
         for (const field of fields) {
           const fieldName = field.name.text;
           const fieldType = field.type!;
+          const {isRecursive} = field;
           const hasMutableGetter =
-            typeSpeller.getPyType(fieldType, "frozen") !==
-            typeSpeller.getPyType(
-              fieldType,
-              "maybe-mutable",
-              field.isRecursive,
-            );
+            typeSpeller.getPyType(fieldType, "mutable", isRecursive) !==
+            typeSpeller.getPyType(fieldType, "maybe-mutable", isRecursive);
           this.pushLine("    _spec.Field(");
           this.pushLine(`     name="${fieldName}",`);
           this.pushLine(`     number=${field.number},`);

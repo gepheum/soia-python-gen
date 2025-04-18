@@ -77,14 +77,12 @@ export class TypeSpeller {
         if (
           flavor === "initializer" ||
           flavor === "frozen" ||
-          flavor === "maybe-mutable"
+          flavor === "maybe-mutable" ||
+          flavor === "mutable"
         ) {
           return PyType.quote(className);
         } else if (flavor === "kind") {
           return PyType.quote(`${className}.Kind`);
-        } else if (flavor === "mutable") {
-          // Enum types are immutable.
-          return PyType.NEVER;
         } else {
           const _: never = flavor;
           throw TypeError();
@@ -134,11 +132,6 @@ export class TypeSpeller {
         return PyType.union([otherType, PyType.NONE]);
       }
       case "primitive": {
-        if (flavor === "mutable") {
-          // Don't add a mutableX getter to the Mutable class if x is immutable.
-          // All primitive types are immutable.
-          return PyType.NEVER;
-        }
         const { primitive } = type;
         switch (primitive) {
           case "bool":
