@@ -2,6 +2,8 @@
 
 Official plugin for generating Python code from [.soia](https://github.com/gepheum/soia) files.
 
+Targets Python 3.10 and higher.
+
 ## Installation
 
 From your project's root directory, run `npm i --save-dev soia-python-gen`.
