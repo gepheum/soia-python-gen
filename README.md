@@ -1,3 +1,6 @@
+[![npm](https://img.shields.io/npm/v/soia-python-gen)](https://www.npmjs.com/package/soia-python-gen)
+[![build](https://github.com/gepheum/soia-python-gen/workflows/Build/badge.svg)](https://github.com/gepheum/soia-python-gen/actions)
+
 # Soia's Python code generator
 
 Official plugin for generating Python code from [.soia](https://github.com/gepheum/soia) files.
