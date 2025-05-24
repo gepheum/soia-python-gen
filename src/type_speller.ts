@@ -74,6 +74,7 @@ export class TypeSpeller {
           }
         }
         // An enum.
+        const _: "enum" = record.recordType;
         if (
           flavor === "initializer" ||
           flavor === "frozen" ||

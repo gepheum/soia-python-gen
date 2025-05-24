@@ -16,6 +16,15 @@ class SoiagenTestCase(unittest.TestCase):
             '["Tyler","Fibonacci"]',
         )
 
+    def test_whole_full_name(self):
+        full_name = FullName.whole(first_name="Tyler", last_name="Fibonacci")
+        self.assertEqual(full_name.first_name, "Tyler")
+        self.assertEqual(full_name.last_name, "Fibonacci")
+        self.assertEqual(
+            FullName.SERIALIZER.to_json_code(full_name),
+            '["Tyler","Fibonacci"]',
+        )
+
     def test_full_name_mutable(self):
         full_name = FullName.Mutable(first_name="Tyler")
         full_name.last_name = "Fibonacci"

@@ -152,6 +152,23 @@ class PythonModuleCodeGenerator {
       this.pushLine(` ${attribute}: ${pyType} = ${defaultValue},`);
     }
     this.pushLine("): ...");
+    this.pushLine();
+    this.pushLine("@classmethod");
+    this.pushLine("def whole(");
+    if (fields.length) {
+      this.pushLine(" *,");
+    }
+    for (const field of fields) {
+      const allRecordsFrozen = field.isRecursive;
+      const pyType = typeSpeller.getPyType(
+        field.type!,
+        "initializer",
+        allRecordsFrozen,
+      );
+      const attribute = structFieldToAttr(field.name.text);
+      this.pushLine(` ${attribute}: ${pyType},`);
+    }
+    this.pushLine(`) -> "${qualifiedName}": ...`);
     for (const field of struct.record.fields) {
       const attribute = structFieldToAttr(field.name.text);
       const pyType = typeSpeller.getPyType(field.type!, "frozen");
@@ -199,8 +216,9 @@ class PythonModuleCodeGenerator {
       const { isRecursive } = field;
       const mutableType = typeSpeller.getPyType(fieldType, "mutable");
       const hasMutableGetter =
-        typeSpeller.getPyType(fieldType, "maybe-mutable", isRecursive) !==
-        mutableType;
+        typeSpeller
+          .getPyType(fieldType, "maybe-mutable", isRecursive)
+          .toString() !== mutableType.toString();
       if (!hasMutableGetter) continue;
       this.pushLine("@property");
       this.pushLine(
@@ -374,8 +392,12 @@ class PythonModuleCodeGenerator {
           const fieldType = field.type!;
           const { isRecursive } = field;
           const hasMutableGetter =
-            typeSpeller.getPyType(fieldType, "mutable", isRecursive) !==
-            typeSpeller.getPyType(fieldType, "maybe-mutable", isRecursive);
+            typeSpeller
+              .getPyType(fieldType, "mutable", isRecursive)
+              .toString() !==
+            typeSpeller
+              .getPyType(fieldType, "maybe-mutable", isRecursive)
+              .toString();
           this.pushLine("    _spec.Field(");
           this.pushLine(`     name="${fieldName}",`);
           this.pushLine(`     number=${field.number},`);
@@ -594,6 +616,7 @@ const PY_LOWER_CASE_KEYWORDS: ReadonlySet<string> = new Set<string>([
 const STRUCT_GEN_LOWER_SYMBOLS: ReadonlySet<string> = new Set<string>([
   "to_frozen",
   "to_mutable",
+  "whole",
 ]);
 
 /** Name of UPPER_CASE formatted symbols generated in the Python class for an enum. */
