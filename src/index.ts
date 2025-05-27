@@ -153,7 +153,7 @@ class PythonModuleCodeGenerator {
     }
     this.pushLine("): ...");
     this.pushLine();
-    this.pushLine("@classmethod");
+    this.pushLine("@staticmethod");
     this.pushLine("def whole(");
     if (fields.length) {
       this.pushLine(" *,");
