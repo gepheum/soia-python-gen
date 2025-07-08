@@ -1,9 +1,9 @@
 import unittest
 
-from soiagen.constants_so import ONE_CONSTANT
-from soiagen.enums_so import JsonValue, Weekday
-from soiagen.full_name_so import FullName
-from soiagen.structs_so import Color, Foo, Item, Items, Triangle, True_
+from soiagen.constants_soia import ONE_CONSTANT
+from soiagen.enums_soia import JsonValue, Weekday
+from soiagen.full_name_soia import FullName
+from soiagen.structs_soia import Color, Foo, Item, Items, Triangle, True_
 
 
 class SoiagenTestCase(unittest.TestCase):

@@ -39,7 +39,7 @@ export function getClassName(
     // The record is located in an imported module.
     const path = record.modulePath;
     const importPath = path.replace(/\.soia$/, "").replace("/", ".");
-    qualifiedName = `soiagen.${importPath}_so.${qualifiedName}`;
+    qualifiedName = `soiagen.${importPath}_soia.${qualifiedName}`;
   }
 
   return {

@@ -26,7 +26,7 @@ class PythonCodeGenerator implements CodeGenerator<Config> {
     const outputFiles: CodeGenerator.OutputFile[] = [];
     for (const module of input.modules) {
       outputFiles.push({
-        path: module.path.replace(/\.soia$/, "_so.py"),
+        path: module.path.replace(/\.soia$/, "_soia.py"),
         code: new PythonModuleCodeGenerator(
           module,
           recordMap,
@@ -97,9 +97,9 @@ class PythonModuleCodeGenerator {
     for (const path of Object.keys(this.inModule.pathToImportedNames)) {
       // We only need to import the modules, no  need to import the actual names.
       // We will refer to the imported symbols using the long notation:
-      //    soiagen.path.to.module_so.Foo
+      //    soiagen.path.to.module_soia.Foo
       this.pushLine(
-        `import soiagen.${path.replace(/\.soia$/, "").replace("/", ".")}_so`,
+        `import soiagen.${path.replace(/\.soia$/, "").replace("/", ".")}_soia`,
       );
     }
     this.pushLine("import soia");
