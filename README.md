@@ -29,7 +29,7 @@ The examples below are for the code generated from [this](https://github.com/gep
 
 ```python
 # Import the given symbols from the Python module generated from "user.soia"
-from soiagen.user_so import TARZAN, User, UserHistory, UserRegistry
+from soiagen.user_soia import TARZAN, User, UserHistory, UserRegistry
 ```
 
 ### Struct classes
