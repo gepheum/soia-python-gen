@@ -1,9 +1,9 @@
 import unittest
 
-from soiagen.constants import ONE_CONSTANT
-from soiagen.enums import JsonValue, Weekday
-from soiagen.full_name import FullName
-from soiagen.structs import Color, Foo, Item, Items, Triangle, True_
+from soiagen.constants_so import ONE_CONSTANT
+from soiagen.enums_so import JsonValue, Weekday
+from soiagen.full_name_so import FullName
+from soiagen.structs_so import Color, Foo, Item, Items, Triangle, True_
 
 
 class SoiagenTestCase(unittest.TestCase):
@@ -16,14 +16,20 @@ class SoiagenTestCase(unittest.TestCase):
             '["Tyler","Fibonacci"]',
         )
 
-    def test_whole_full_name(self):
-        full_name = FullName.whole(first_name="Tyler", last_name="Fibonacci")
+    def test_partial_full_name(self):
+        full_name = FullName.partial(first_name="Tyler")
         self.assertEqual(full_name.first_name, "Tyler")
-        self.assertEqual(full_name.last_name, "Fibonacci")
+        self.assertEqual(full_name.last_name, "")
         self.assertEqual(
             FullName.SERIALIZER.to_json_code(full_name),
-            '["Tyler","Fibonacci"]',
+            '["Tyler"]',
         )
+
+    def test_full_name_replace(self):
+        full_name = FullName(first_name="Tyler", last_name="Smith")
+        full_name = full_name.replace(last_name="Fibonacci")
+        self.assertEqual(full_name.first_name, "Tyler")
+        self.assertEqual(full_name.last_name, "Fibonacci")
 
     def test_full_name_mutable(self):
         full_name = FullName.Mutable(first_name="Tyler")
@@ -34,7 +40,7 @@ class SoiagenTestCase(unittest.TestCase):
         )
 
     def test_nested_struct(self):
-        bar = Foo.Bar(bar="Bar")
+        bar = Foo.Bar.partial(bar="Bar")
         self.assertEqual(bar.foos, None)
         self.assertEqual(bar.bar, "Bar")
 
@@ -43,17 +49,17 @@ class SoiagenTestCase(unittest.TestCase):
         self.assertEqual(Triangle.DEFAULT.points, ())
 
     def test_struct_with_name_conflicts(self):
-        t = True_(self=())
+        t = True_.partial(self=())
         self.assertEqual(t.self, ())
 
     def test_keyed_arrays(self):
-        items = Items(
+        items = Items.partial(
             array_with_enum_key=[
-                Item(
+                Item.partial(
                     weekday=Weekday.MONDAY,
                     bool=True,
                 ),
-                Item(
+                Item.partial(
                     weekday=Weekday.TUESDAY,
                     bool=True,
                 ),
@@ -61,7 +67,7 @@ class SoiagenTestCase(unittest.TestCase):
         )
         self.assertEqual(
             items.array_with_enum_key.find("TUESDAY"),
-            Item(
+            Item.partial(
                 weekday=Weekday.TUESDAY,
                 bool=True,
             ),
@@ -98,3 +104,11 @@ class SoiagenTestCase(unittest.TestCase):
                 ]
             ),
         )
+
+    def test_or_mutable_type_is_defined(self):
+        _ = FullName.OrMutable
+        del _
+
+    def test_kind_type_is_defined(self):
+        _ = JsonValue.Kind
+        del _

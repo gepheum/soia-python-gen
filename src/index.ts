@@ -26,7 +26,7 @@ class PythonCodeGenerator implements CodeGenerator<Config> {
     const outputFiles: CodeGenerator.OutputFile[] = [];
     for (const module of input.modules) {
       outputFiles.push({
-        path: module.path.replace(/\.soia$/, ".py"),
+        path: module.path.replace(/\.soia$/, "_so.py"),
         code: new PythonModuleCodeGenerator(
           module,
           recordMap,
@@ -97,9 +97,9 @@ class PythonModuleCodeGenerator {
     for (const path of Object.keys(this.inModule.pathToImportedNames)) {
       // We only need to import the modules, no  need to import the actual names.
       // We will refer to the imported symbols using the long notation:
-      //    soiagen.path.to.module.Foo
+      //    soiagen.path.to.module_so.Foo
       this.pushLine(
-        `import soiagen.${path.replace(/\.soia$/, "").replace("/", ".")}`,
+        `import soiagen.${path.replace(/\.soia$/, "").replace("/", ".")}_so`,
       );
     }
     this.pushLine("import soia");
@@ -148,13 +148,12 @@ class PythonModuleCodeGenerator {
         allRecordsFrozen,
       );
       const attribute = structFieldToAttr(field.name.text);
-      const defaultValue = getDefaultValue(field.type!);
-      this.pushLine(` ${attribute}: ${pyType} = ${defaultValue},`);
+      this.pushLine(` ${attribute}: ${pyType},`);
     }
     this.pushLine("): ...");
     this.pushLine();
     this.pushLine("@staticmethod");
-    this.pushLine("def whole(");
+    this.pushLine("def partial(");
     if (fields.length) {
       this.pushLine(" *,");
     }
@@ -166,7 +165,24 @@ class PythonModuleCodeGenerator {
         allRecordsFrozen,
       );
       const attribute = structFieldToAttr(field.name.text);
-      this.pushLine(` ${attribute}: ${pyType},`);
+      const defaultValue = getDefaultValue(field.type!);
+      this.pushLine(` ${attribute}: ${pyType} = ${defaultValue},`);
+    }
+    this.pushLine(`) -> "${qualifiedName}": ...`);
+    this.pushLine();
+    this.pushLine("def replace(");
+    this.pushLine(" _self,");
+    if (fields.length) {
+      this.pushLine(" *,");
+    }
+    for (const field of fields) {
+      const allRecordsFrozen = field.isRecursive;
+      const pyType = PyType.union([
+        typeSpeller.getPyType(field.type!, "initializer", allRecordsFrozen),
+        PyType.of("soia.Keep"),
+      ]);
+      const attribute = structFieldToAttr(field.name.text);
+      this.pushLine(` ${attribute}: ${pyType} = soia.KEEP,`);
     }
     this.pushLine(`) -> "${qualifiedName}": ...`);
     for (const field of struct.record.fields) {
@@ -614,9 +630,10 @@ const PY_LOWER_CASE_KEYWORDS: ReadonlySet<string> = new Set<string>([
 
 /** Name of lower_case formatted symbols generated in the Python class for a struct. */
 const STRUCT_GEN_LOWER_SYMBOLS: ReadonlySet<string> = new Set<string>([
+  "partial",
+  "replace",
   "to_frozen",
   "to_mutable",
-  "whole",
 ]);
 
 /** Name of UPPER_CASE formatted symbols generated in the Python class for an enum. */
