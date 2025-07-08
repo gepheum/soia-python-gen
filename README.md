@@ -29,7 +29,7 @@ The examples below are for the code generated from [this](https://github.com/gep
 
 ```python
 # Import the given symbols from the Python module generated from "user.soia"
-from soiagen.user import TARZAN, User, UserHistory, UserRegistry
+from soiagen.user_so import TARZAN, User, UserHistory, UserRegistry
 ```
 
 ### Struct classes
@@ -39,36 +39,70 @@ For every struct `S` in the .soia file, soia generates a frozen/deeply immutable
 #### Frozen struct classes
 
 ```python
-# For every struct S in the .soia file, soia generates a frozen/deeply immutable
-# class 'S' and a mutable class 'S.Mutable'.
+# To consruct a frozen/deeply immutable User, either call the partial() static
+# factory method or the constructor.
 
-# Consruct a frozen/deeply immutable User
-john = User(
+john = User.partial(
     user_id=42,
     name="John Doe",
 )
 
 assert john.name == "John Doe"
 assert john.user_id == 42
-# Fields not specified in the constructor are set to their default values
+# Fields not specified in the call to partial() are set to their default values
 assert john.pets == ()
 
 # Static type checkers will raise an error if you try to modify a frozen struct:
 # john.name = "John Smith"
 
+# If you call the constructor, you have to specify all the fields.
 jane = User(
     user_id=43,
     name="Jane Doe",
     quote="I am Jane.",
-    pets=[User.Pet(name="Fluffy"), User.Pet(name="Fido")],
+    pets=[
+        User.Pet.partial(name="Fluffy"),
+        User.Pet.partial(name="Fido"),
+    ],
     subscription_status=User.SubscriptionStatus.PREMIUM,
 )
 
-# The list passed to the constructor is copied into a tuple to guarantee deep
-# immutability.
+# The list passed to the constructor or partial() is copied into a tuple to
+# guarantee deep immutability.
 assert isinstance(jane.pets, tuple)
 
-assert User.DEFAULT == User()
+assert User.DEFAULT == User.partial()
+```
+
+#### Mutable struct classes
+
+```python
+# User.Mutable is a mutable version of User.
+lyla_mut = User.Mutable()
+lyla_mut.user_id = 44
+lyla_mut.name = "Lyla Doe"
+
+# You can also set fields in the constructor.
+joly_mut = User.Mutable(user_id=45)
+joly_mut.name = "Joly Doe"
+
+joly_history_mut = UserHistory.Mutable()
+joly_history_mut.user = joly_mut
+# ^ The right-hand side of the assignment can be either frozen or mutable.
+
+# joly_history_mut.user.quote = "I am Joly."
+# ^ Static error: quote is readonly because joly_history_mut.user may be frozen
+
+# The mutable_user() property first checks if 'user' is already a mutable
+# struct, and if so, returns it. Otherwise, it assigns to 'user' a mutable
+# shallow copy of itself and returns it.
+joly_history_mut.mutable_user.quote = "I am Joly."
+
+# Similarly, mutable_pets() first checks if 'pets' is already a mutable array,
+# and if so, returns it. Otherwise, it assigns to 'pets' a mutable shallow copy
+# of itself and returns it.
+lyla_mut.mutable_pets.append(User.Pet.partial(name="Cupcake"))
+lyla_mut.mutable_pets.append(User.Pet.Mutable(name="Simba"))
 ```
 
 #### Converting between frozen and mutable
@@ -82,6 +116,15 @@ evil_jane_mut.name = "Evil Jane"
 # to_frozen() recursively copies the mutable values held by properties of the
 # object. It's cheap if all the values are frozen, like in this example.
 evil_jane: User = evil_jane_mut.to_frozen()
+
+# You can also call replace() on the frozen struct.
+evil_jane = evil_jane.replace(name="Evil Jane")
+# Same as:
+#   evil_jane_mut = evil_jane.to_mutable()
+#   evil_jane_mut.name = "Evil Jane"
+#   evil_jane = evil_jane_mut.to_frozen()
+
+assert evil_jane.user_id == 43
 ```
 
 #### Writing logic agnostic of mutability
