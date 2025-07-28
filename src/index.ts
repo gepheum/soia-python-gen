@@ -6,6 +6,7 @@ import type {
   Constant,
   Method,
   Module,
+  Record,
   RecordKey,
   RecordLocation,
   ResolvedType,
@@ -137,19 +138,7 @@ class PythonModuleCodeGenerator {
     this.pushLine(`class ${className.name}:`);
     this.pushLine("def __init__(");
     this.pushLine(" _self,");
-    if (fields.length) {
-      this.pushLine(" *,");
-    }
-    for (const field of fields) {
-      const allRecordsFrozen = field.isRecursive;
-      const pyType = typeSpeller.getPyType(
-        field.type!,
-        "initializer",
-        allRecordsFrozen,
-      );
-      const attribute = structFieldToAttr(field.name.text);
-      this.pushLine(` ${attribute}: ${pyType},`);
-    }
+    this.writeStructFieldsAsParams(struct.record, "initializer", "no-default");
     this.pushLine("): ...");
     this.pushLine();
     this.pushLine("@staticmethod");
@@ -172,18 +161,7 @@ class PythonModuleCodeGenerator {
     this.pushLine();
     this.pushLine("def replace(");
     this.pushLine(" _self,");
-    if (fields.length) {
-      this.pushLine(" *,");
-    }
-    for (const field of fields) {
-      const allRecordsFrozen = field.isRecursive;
-      const pyType = PyType.union([
-        typeSpeller.getPyType(field.type!, "initializer", allRecordsFrozen),
-        PyType.of("soia.Keep"),
-      ]);
-      const attribute = structFieldToAttr(field.name.text);
-      this.pushLine(` ${attribute}: ${pyType} = soia.KEEP,`);
-    }
+    this.writeStructFieldsAsParams(struct.record, "initializer", "keep");
     this.pushLine(`) -> "${qualifiedName}": ...`);
     for (const field of struct.record.fields) {
       const attribute = structFieldToAttr(field.name.text);
@@ -200,20 +178,7 @@ class PythonModuleCodeGenerator {
     this.pushLine("class Mutable:");
     this.pushLine("def __init__(");
     this.pushLine(" _self,");
-    if (fields.length) {
-      this.pushLine(" *,");
-    }
-    for (const field of fields) {
-      const allRecordsFrozen = field.isRecursive;
-      const pyType = typeSpeller.getPyType(
-        field.type!,
-        "maybe-mutable",
-        allRecordsFrozen,
-      );
-      const attribute = structFieldToAttr(field.name.text);
-      const defaultValue = getDefaultValue(field.type!);
-      this.pushLine(` ${attribute}: ${pyType} = ${defaultValue},`);
-    }
+    this.writeStructFieldsAsParams(struct.record, "maybe-mutable", "default");
     this.pushLine("): ...");
     this.pushLine();
     for (const field of struct.record.fields) {
@@ -255,6 +220,36 @@ class PythonModuleCodeGenerator {
     );
   }
 
+  private writeStructFieldsAsParams(
+    struct: Record,
+    flavor: "initializer" | "maybe-mutable",
+    default_: "no-default" | "keep" | "default",
+  ): void {
+    const { typeSpeller } = this;
+    const { fields } = struct;
+    if (fields.length) {
+      this.pushLine(" *,");
+    }
+    for (const field of fields) {
+      const allRecordsFrozen = field.isRecursive;
+      let pyType = typeSpeller.getPyType(field.type!, flavor, allRecordsFrozen);
+      if (default_ === "keep") {
+        pyType = PyType.union([pyType, PyType.of("soia.Keep")]);
+      }
+      const attribute = structFieldToAttr(field.name.text);
+      if (default_ === "no-default") {
+        this.pushLine(` ${attribute}: ${pyType},`);
+      } else if (default_ === "keep") {
+        const defaultValue = getDefaultValue(field.type!);
+        this.pushLine(` ${attribute}: ${pyType} = ${defaultValue},`);
+      } else if (default_ === "default") {
+        this.pushLine(` ${attribute}: ${pyType} = soia.KEEP,`);
+      } else {
+        const _: never = default_;
+      }
+    }
+  }
+
   private writeClassForEnum(record: RecordLocation): void {
     const { typeSpeller } = this;
     const { fields } = record.record;
@@ -269,14 +264,25 @@ class PythonModuleCodeGenerator {
       const attribute = enumValueFieldToAttr(constantField.name.text);
       this.pushLine(`${attribute}: typing.Final["${qualifiedName}"] = _`);
     }
-    this.pushLine();
     for (const valueField of valueFields) {
       const name = valueField.name.text;
-      const pyType = typeSpeller.getPyType(valueField.type!, "initializer");
+      const type = valueField.type!;
+      const pyType = typeSpeller.getPyType(type, "initializer");
+      this.pushLine();
       this.pushLine("@staticmethod");
       this.pushLine(
         `def wrap_${name}(value: ${pyType}) -> "${qualifiedName}": ...`,
       );
+      if (type.kind === "record") {
+        const { record } = typeSpeller.recordMap.get(type.key)!;
+        if (record.recordType === "struct") {
+          this.pushLine();
+          this.pushLine("@staticmethod");
+          this.pushLine(`def create_${name}(`);
+          this.writeStructFieldsAsParams(record, "initializer", "no-default");
+          this.pushLine(`) -> "${qualifiedName}": ...`);
+        }
+      }
     }
     this.pushLine();
     this.pushLine("def __init__(self, _: typing.NoReturn): ...");

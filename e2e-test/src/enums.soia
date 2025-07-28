@@ -26,3 +26,11 @@ enum EmptyEnum {}
 enum EnumWithNameConflict {
   SERIALIZER;
 }
+
+enum EnumWithStructField {
+  struct S {
+    x: float32 = 0;
+    y: float32 = 1;
+  }
+  s: S = 1;
+}
