@@ -24,7 +24,8 @@
     "build": "tsc",
     "format": "prettier --write \"**/*.ts\"",
     "format:check": "prettier --check \"**/*.ts\"",
-    "test": "npm run build && soiac -r ./e2e-test && cd e2e-test && python3 -m venv test-env && source test-env/bin/activate && pip install -r requirements.txt && python3 -m unittest tests/**.py && cd ..",
+    "test": "npm run build && soiac -r ./e2e-test && cd e2e-test && pip install -r requirements.txt && python3 -m unittest tests/**.py && cd ..",
+    "test:local": "npm run build && soiac -r ./e2e-test && cd e2e-test && python3 -m venv test-env && source test-env/bin/activate && pip install -r requirements.txt && python3 -m unittest tests/**.py && cd ..",
     "test:cleanup": "rm -rf e2e-test/test-env"
   },
   "devDependencies": {
