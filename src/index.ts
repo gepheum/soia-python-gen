@@ -240,10 +240,10 @@ class PythonModuleCodeGenerator {
       if (default_ === "no-default") {
         this.pushLine(` ${attribute}: ${pyType},`);
       } else if (default_ === "keep") {
+        this.pushLine(` ${attribute}: ${pyType} = soia.KEEP,`);
+      } else if (default_ === "default") {
         const defaultValue = getDefaultValue(field.type!);
         this.pushLine(` ${attribute}: ${pyType} = ${defaultValue},`);
-      } else if (default_ === "default") {
-        this.pushLine(` ${attribute}: ${pyType} = soia.KEEP,`);
       } else {
         const _: never = default_;
       }
