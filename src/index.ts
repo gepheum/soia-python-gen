@@ -147,7 +147,7 @@ class PythonModuleCodeGenerator {
       this.pushLine(" *,");
     }
     for (const field of fields) {
-      const allRecordsFrozen = field.isRecursive;
+      const allRecordsFrozen = !!field.isRecursive;
       const pyType = typeSpeller.getPyType(
         field.type!,
         "initializer",
@@ -182,7 +182,7 @@ class PythonModuleCodeGenerator {
     this.pushLine("): ...");
     this.pushLine();
     for (const field of struct.record.fields) {
-      const allRecordsFrozen = field.isRecursive;
+      const allRecordsFrozen = !!field.isRecursive;
       const attribute = structFieldToAttr(field.name.text);
       const pyType = typeSpeller.getPyType(
         field.type!,
@@ -198,7 +198,7 @@ class PythonModuleCodeGenerator {
       const mutableType = typeSpeller.getPyType(fieldType, "mutable");
       const hasMutableGetter =
         typeSpeller
-          .getPyType(fieldType, "maybe-mutable", isRecursive)
+          .getPyType(fieldType, "maybe-mutable", !!isRecursive)
           .toString() !== mutableType.toString();
       if (!hasMutableGetter) continue;
       this.pushLine("@property");
@@ -232,7 +232,11 @@ class PythonModuleCodeGenerator {
     }
     for (const field of fields) {
       const allRecordsFrozen = field.isRecursive;
-      let pyType = typeSpeller.getPyType(field.type!, flavor, allRecordsFrozen);
+      let pyType = typeSpeller.getPyType(
+        field.type!,
+        flavor,
+        !!allRecordsFrozen,
+      );
       if (default_ === "keep") {
         pyType = PyType.union([pyType, PyType.of("soia.Keep")]);
       }
@@ -415,10 +419,10 @@ class PythonModuleCodeGenerator {
           const { isRecursive } = field;
           const hasMutableGetter =
             typeSpeller
-              .getPyType(fieldType, "mutable", isRecursive)
+              .getPyType(fieldType, "mutable", !!isRecursive)
               .toString() !==
             typeSpeller
-              .getPyType(fieldType, "maybe-mutable", isRecursive)
+              .getPyType(fieldType, "maybe-mutable", !!isRecursive)
               .toString();
           this.pushLine("    _spec.Field(");
           this.pushLine(`     name="${fieldName}",`);
@@ -499,8 +503,8 @@ class PythonModuleCodeGenerator {
         const itemSpec = this.typeToSpec(type.item);
         let keyArg = "";
         if (type.key) {
-          const attributes = type.key.fieldNames
-            .map((n) => `"${structFieldToAttr(n.text)}", `)
+          const attributes = type.key.path
+            .map((n) => `"${structFieldToAttr(n.name.text)}", `)
             .join("")
             .trimEnd();
           keyArg = `, (${attributes})`;
