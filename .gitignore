@@ -2,4 +2,5 @@ __pycache__
 dist
 node_modules
 soiagen
+test-env
 tsconfig.tsbuildinfo
