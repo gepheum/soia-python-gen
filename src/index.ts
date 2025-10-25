@@ -1,6 +1,3 @@
-import { PY_UPPER_CAMEL_KEYWORDS, getClassName } from "./class_speller.js";
-import { PyType } from "./py_type.js";
-import { TypeSpeller } from "./type_speller.js";
 import type {
   CodeGenerator,
   Constant,
@@ -12,6 +9,9 @@ import type {
   ResolvedType,
 } from "soiac";
 import { z } from "zod";
+import { PY_UPPER_CAMEL_KEYWORDS, getClassName } from "./class_speller.js";
+import { PyType } from "./py_type.js";
+import { TypeSpeller } from "./type_speller.js";
 
 const Config = z.object({});
 
@@ -317,7 +317,7 @@ class PythonModuleCodeGenerator {
       this.pushLine(`def value(self) -> ${valueType}: ...`);
     }
     {
-      const getVariantType = (name: string) =>
+      const getVariantType = (name: string): PyType =>
         PyType.quote(`${qualifiedName}._${name}`);
       const typesInUnion = [getVariantType("Unknown")].concat(
         fields.map((f) => getVariantType(f.name.text)),
@@ -531,7 +531,7 @@ class PythonModuleCodeGenerator {
   private pushLine(code = ""): void {
     if (code === "") {
       // An empty line.
-      if (/\n\n$|\:\n$/.test(this.code) && this.indent != "") {
+      if (/\n\n$|:\n$/.test(this.code) && this.indent != "") {
         // Outside of the top level, coelesce empty lines.
         return;
       }
@@ -596,6 +596,8 @@ function getDefaultValue(type: ResolvedType): string {
         case "timestamp":
           return "soia.Timestamp.EPOCH";
       }
+      const _: never = type.primitive;
+      break;
     }
     case "record":
       return "_";

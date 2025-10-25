@@ -1,11 +1,11 @@
 export class PyType {
   /** Creates a non-union type. */
-  static of(type: string) {
+  static of(type: string): PyType {
     return new PyType([type]);
   }
 
   /** Creates a non-union type by adding quotes to the given string. */
-  static quote(unquoted: string) {
+  static quote(unquoted: string): PyType {
     return new PyType([`"${unquoted}"`]);
   }
 
@@ -38,7 +38,7 @@ export class PyType {
         return "typing.NoReturn";
       case 1:
         return typesInUnion[0]!;
-      default:
+      default: {
         // Must quote the union if one of the operands is quoted and unless one operand
         // is generic, in which case we prefer the typing.Union notation.
         const oneTypeIsGeneric = typesInUnion.some((t) => t.includes("["));
@@ -55,6 +55,7 @@ export class PyType {
           : typesInUnion;
         const joinResult = parts.join(" | ");
         return oneTypeIsQuoted ? `"${joinResult}"` : joinResult;
+      }
     }
   }
 }

@@ -22,16 +22,25 @@
   ],
   "scripts": {
     "build": "tsc",
-    "format": "prettier --write \"**/*.ts\"",
-    "format:check": "prettier --check \"**/*.ts\"",
+    "format-soia": "cd e2e-test && soiac --fmt fix && cd ..",
+    "format-soia:check": "cd e2e-test && soiac --fmt check && cd ..",
+    "format-python": "cd e2e-test && black . && cd ..",
+    "format-python:check": "cd e2e-test && black --check --diff . && cd ..",
+    "format": "prettier --write \"**/*.ts\" && npm run format-soia && npm run format-python",
+    "format:check": "prettier --check \"**/*.ts\" && npm run format-soia:check && npm run format-python:check",
     "test": "npm run build && soiac -r ./e2e-test && cd e2e-test && pip install -r requirements.txt && python3 -m unittest tests/**.py && cd ..",
     "test:local": "npm run build && soiac -r ./e2e-test && cd e2e-test && python3 -m venv test-env && source test-env/bin/activate && pip install -r requirements.txt && python3 -m unittest tests/**.py && cd ..",
-    "test:cleanup": "rm -rf e2e-test/test-env"
+    "test:cleanup": "rm -rf e2e-test/test-env",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix"
   },
   "devDependencies": {
-    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "@types/node": "^20.11.5",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "eslint": "^8.54.0",
     "prettier": "^3.2.4",
+    "prettier-plugin-organize-imports": "^4.2.0",
     "soiac": "^1.0.41",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
