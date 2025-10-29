@@ -1,1 +1,1 @@
-soia-client >= 1.1.6
+soia-client >= 1.1.10
