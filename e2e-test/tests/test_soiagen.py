@@ -83,7 +83,7 @@ class SoiagenTestCase(unittest.TestCase):
             JsonValue.wrap_array(
                 [
                     JsonValue.wrap_boolean(True),
-                    JsonValue.wrap_number(3.14),
+                    JsonValue.wrap_number(2.5),
                     JsonValue.wrap_string(
                         "\n".join(
                             [
