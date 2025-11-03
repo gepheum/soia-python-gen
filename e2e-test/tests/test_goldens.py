@@ -129,6 +129,20 @@ def reserialize_value_and_verify(input_value: Assertion.ReserializeValue):
             e.add_context(f"input value: {typed_value_input}")
             raise
 
+    # Make sure the encoded value can be skipped.
+    for expected_bytes in input_value.expected_bytes:
+        buffer = bytearray(len(expected_bytes) + 2)
+        prefix = b"soia"
+        buffer[0:4] = prefix
+        buffer[4] = 248
+        buffer[5 : len(expected_bytes) + 1] = expected_bytes[len(prefix) :]
+        buffer[len(expected_bytes) + 1] = 1
+        point = Point.SERIALIZER.from_bytes(bytes(buffer))
+        if point.x != 1:
+            raise AssertionError(
+                message=f"Failed to skip value: got point.x={point.x}, expected 1; input: {input_value}"
+            )
+
     typed_value = evaluate_typed_value(input_value.value)
     for alternative_json in input_value.alternative_jsons:
         try:
