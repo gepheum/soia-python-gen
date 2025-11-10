@@ -24,6 +24,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - run: npm ci
+      - run: npm run build
       - run: npm run format:check
       - run: npm run test
       - uses: jakebailey/pyright-action@v2
