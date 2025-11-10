@@ -23,6 +23,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+      - uses: psf/black@stable
       - run: npm ci
       - run: npm run build
       - run: npm run format:check
