@@ -288,7 +288,7 @@ def reserialize_large_string_and_verify(input_value: Assertion.ReserializeLargeS
 
 
 def reserialize_large_array_and_verify(input_value: Assertion.ReserializeLargeArray):
-    array = [1] * input_value.num_items
+    array = (1,) * input_value.num_items
     serializer = soia.array_serializer(soia.primitive_serializer("int32"))
 
     def is_array_valid(arr):
