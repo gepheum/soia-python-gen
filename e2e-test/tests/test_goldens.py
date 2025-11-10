@@ -165,6 +165,27 @@ def reserialize_value_and_verify(input_value: Assertion.ReserializeValue):
                 f"while processing alternative JSON: {evaluate_string(alternative_json)}"
             )
             raise
+    for alternative_json in (
+        input_value.expected_dense_json + input_value.expected_readable_json
+    ):
+        try:
+            round_trip_json = to_dense_json(
+                typed_value.serializer,
+                from_json_keep_unrecognized(
+                    typed_value.serializer,
+                    alternative_json,
+                ),
+            )
+            # Check if round_trip_json matches any of the expected values
+            verify_assertion(
+                Assertion.create_string_in(
+                    actual=StringExpression.wrap_literal(round_trip_json),
+                    expected=input_value.expected_dense_json,
+                )
+            )
+        except AssertionError as e:
+            e.add_context(f"while processing alternative JSON: {alternative_json}")
+            raise
 
     for alternative_bytes in input_value.alternative_bytes:
         try:
@@ -185,6 +206,27 @@ def reserialize_value_and_verify(input_value: Assertion.ReserializeValue):
         except AssertionError as e:
             e.add_context(
                 f"while processing alternative bytes: {evaluate_bytes(alternative_bytes).hex()}"
+            )
+            raise
+    for alternative_bytes in input_value.expected_bytes:
+        try:
+            round_trip_bytes = to_bytes(
+                typed_value.serializer,
+                from_bytes_drop_unrecognized_fields(
+                    typed_value.serializer,
+                    alternative_bytes,
+                ),
+            )
+            # Check if round_trip_bytes matches any of the expected values
+            verify_assertion(
+                Assertion.create_bytes_in(
+                    actual=BytesExpression.wrap_literal(round_trip_bytes),
+                    expected=input_value.expected_bytes,
+                )
+            )
+        except AssertionError as e:
+            e.add_context(
+                f"while processing alternative bytes: {alternative_bytes.hex()}"
             )
             raise
 
