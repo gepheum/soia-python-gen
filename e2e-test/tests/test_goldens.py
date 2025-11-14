@@ -8,6 +8,7 @@ from soiagen.goldens_soia import (
     Assertion,
     BytesExpression,
     Color,
+    KeyedArrays,
     MyEnum,
     Point,
     StringExpression,
@@ -231,16 +232,21 @@ def reserialize_value_and_verify(input_value: Assertion.ReserializeValue):
             raise
 
     if input_value.expected_type_descriptor:
-        actual = json.dumps(
-            typed_value.serializer.type_descriptor.as_json(),
-            indent=2,
-        )
+        actual = typed_value.serializer.type_descriptor.as_json_code()
         verify_assertion(
             Assertion.create_string_equal(
                 actual=StringExpression.wrap_literal(actual),
                 expected=StringExpression.wrap_literal(
                     input_value.expected_type_descriptor
                 ),
+            )
+        )
+        verify_assertion(
+            Assertion.create_string_equal(
+                actual=StringExpression.wrap_literal(
+                    soia.reflection.TypeDescriptor.from_json_code(actual).as_json_code()
+                ),
+                expected=StringExpression.wrap_literal(actual),
             )
         )
 
@@ -433,6 +439,11 @@ def evaluate_typed_value(literal: TypedValue) -> TypedValueType[Any]:
         return TypedValueType(
             value=literal.union.value,
             serializer=MyEnum.SERIALIZER,
+        )
+    elif literal.union.kind == "keyed_arrays":
+        return TypedValueType(
+            value=literal.union.value,
+            serializer=KeyedArrays.SERIALIZER,
         )
     elif literal.union.kind == "round_trip_dense_json":
         other = evaluate_typed_value(literal.union.value)
