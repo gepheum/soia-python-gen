@@ -16,6 +16,7 @@ from soiagen.goldens_soia import (
 )
 
 import soia
+import soia.reflection
 
 
 class AssertionError(Exception):
