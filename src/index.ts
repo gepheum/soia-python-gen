@@ -258,19 +258,19 @@ class PythonModuleCodeGenerator {
     const { typeSpeller } = this;
     const { fields } = record.record;
     const constantFields = fields.filter((f) => !f.type);
-    const valueFields = fields.filter((f) => f.type);
+    const wrapperFields = fields.filter((f) => f.type);
     const className = getClassName(record, this.inModule);
     const { qualifiedName } = className;
     this.pushLine("@typing.final");
     this.pushLine(`class ${className.name}:`);
     this.pushLine(`UNKNOWN: typing.Final["${qualifiedName}"] = _`);
     for (const constantField of constantFields) {
-      const attribute = enumValueFieldToAttr(constantField.name.text);
+      const attribute = enumWrapperFieldToAttr(constantField.name.text);
       this.pushLine(`${attribute}: typing.Final["${qualifiedName}"] = _`);
     }
-    for (const valueField of valueFields) {
-      const name = valueField.name.text;
-      const type = valueField.type!;
+    for (const wrapperField of wrapperFields) {
+      const name = wrapperField.name.text;
+      const type = wrapperField.type!;
       const pyType = typeSpeller.getPyType(type, "initializer");
       this.pushLine();
       this.pushLine("@staticmethod");
@@ -307,7 +307,7 @@ class PythonModuleCodeGenerator {
       this.pushLine(`def kind(self) -> ${kindType}: ...`);
     }
     {
-      const typesInUnion: PyType[] = valueFields.map((f) =>
+      const typesInUnion: PyType[] = wrapperFields.map((f) =>
         typeSpeller.getPyType(f.type!, "frozen"),
       );
       typesInUnion.push(PyType.NONE);
@@ -440,23 +440,23 @@ class PythonModuleCodeGenerator {
         this.pushLine(`   ),`);
       } else {
         const constantFields = fields.filter((f) => !f.type);
-        const valueFields = fields.filter((f) => f.type);
+        const wrapperFields = fields.filter((f) => f.type);
         this.pushLine(`   constant_fields=(`);
         for (const field of constantFields) {
           const fieldName = field.name.text;
           this.pushLine("    _spec.ConstantField(");
           this.pushLine(`     name="${fieldName}",`);
           this.pushLine(`     number=${field.number},`);
-          const attribute = enumValueFieldToAttr(fieldName);
+          const attribute = enumWrapperFieldToAttr(fieldName);
           if (attribute !== fieldName) {
             this.pushLine(`     _attribute="${attribute}",`);
           }
           this.pushLine("    ),");
         }
         this.pushLine(`   ),`);
-        this.pushLine(`   value_fields=(`);
-        for (const field of valueFields) {
-          this.pushLine("    _spec.ValueField(");
+        this.pushLine(`   wrapper_fields=(`);
+        for (const field of wrapperFields) {
+          this.pushLine("    _spec.WrapperField(");
           this.pushLine(`     name="${field.name.text}",`);
           this.pushLine(`     number=${field.number},`);
           this.pushLine(`     type=${this.typeToSpec(field.type!)},`);
@@ -568,7 +568,7 @@ function structFieldToAttr(fieldName: string): string {
     : fieldName;
 }
 
-function enumValueFieldToAttr(fieldName: string): string {
+function enumWrapperFieldToAttr(fieldName: string): string {
   return STRUCT_GEN_UPPER_SYMBOLS.has(fieldName) ? `${fieldName}_` : fieldName;
 }
 
