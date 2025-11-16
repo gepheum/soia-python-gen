@@ -203,12 +203,12 @@ def get_subscription_info_text(status: User.SubscriptionStatus) -> str:
 
 ### Serialization
 
-Every frozen struct class and enum class has a static readonly `SERIALIZER` property which can be used for serializing and deserializing instances of the class.
+Every frozen struct class and enum class has a static readonly `serializer` property which can be used for serializing and deserializing instances of the class.
 
 ```python
 # Serialize 'john' to dense JSON.
 
-serializer = User.SERIALIZER
+serializer = User.serializer
 
 print(serializer.to_json(john))
 # [42, 'John Doe']
@@ -309,7 +309,7 @@ Reflection allows you to inspect a soia type at runtime.
 ```python
 field_names: list[str] = []
 
-user_type_descriptor = User.SERIALIZER.type_descriptor
+user_type_descriptor = User.serializer.type_descriptor
 
 # 'user_type_descriptor' has information about User and all the types it
 # depends on.

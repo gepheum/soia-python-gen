@@ -139,7 +139,7 @@ def reserialize_value_and_verify(input_value: Assertion.ReserializeValue):
         buffer[4] = 248
         buffer[5 : len(expected_bytes) + 1] = expected_bytes[len(prefix) :]
         buffer[len(expected_bytes) + 1] = 1
-        point = Point.SERIALIZER.from_bytes(bytes(buffer))
+        point = Point.serializer.from_bytes(bytes(buffer))
         if point.x != 1:
             raise AssertionError(
                 message=f"Failed to skip value: got point.x={point.x}, expected 1; input: {input_value}"
@@ -429,22 +429,22 @@ def evaluate_typed_value(literal: TypedValue) -> TypedValueType[Any]:
     elif literal.union.kind == "point":
         return TypedValueType(
             value=literal.union.value,
-            serializer=Point.SERIALIZER,
+            serializer=Point.serializer,
         )
     elif literal.union.kind == "color":
         return TypedValueType(
             value=literal.union.value,
-            serializer=Color.SERIALIZER,
+            serializer=Color.serializer,
         )
     elif literal.union.kind == "my_enum":
         return TypedValueType(
             value=literal.union.value,
-            serializer=MyEnum.SERIALIZER,
+            serializer=MyEnum.serializer,
         )
     elif literal.union.kind == "keyed_arrays":
         return TypedValueType(
             value=literal.union.value,
-            serializer=KeyedArrays.SERIALIZER,
+            serializer=KeyedArrays.serializer,
         )
     elif literal.union.kind == "round_trip_dense_json":
         other = evaluate_typed_value(literal.union.value)
@@ -473,86 +473,86 @@ def evaluate_typed_value(literal: TypedValue) -> TypedValueType[Any]:
     elif literal.union.kind == "point_from_json_keep_unrecognized":
         return TypedValueType(
             value=from_json_keep_unrecognized(
-                Point.SERIALIZER, evaluate_string(literal.union.value)
+                Point.serializer, evaluate_string(literal.union.value)
             ),
-            serializer=Point.SERIALIZER,
+            serializer=Point.serializer,
         )
     elif literal.union.kind == "point_from_json_drop_unrecognized":
         return TypedValueType(
             value=from_json_drop_unrecognized(
-                Point.SERIALIZER, evaluate_string(literal.union.value)
+                Point.serializer, evaluate_string(literal.union.value)
             ),
-            serializer=Point.SERIALIZER,
+            serializer=Point.serializer,
         )
     elif literal.union.kind == "point_from_bytes_keep_unrecognized":
         return TypedValueType(
             value=from_bytes_keep_unrecognized(
-                Point.SERIALIZER, evaluate_bytes(literal.union.value)
+                Point.serializer, evaluate_bytes(literal.union.value)
             ),
-            serializer=Point.SERIALIZER,
+            serializer=Point.serializer,
         )
     elif literal.union.kind == "point_from_bytes_drop_unrecognized":
         return TypedValueType(
             value=from_bytes_drop_unrecognized_fields(
-                Point.SERIALIZER, evaluate_bytes(literal.union.value)
+                Point.serializer, evaluate_bytes(literal.union.value)
             ),
-            serializer=Point.SERIALIZER,
+            serializer=Point.serializer,
         )
     elif literal.union.kind == "color_from_json_keep_unrecognized":
         return TypedValueType(
             value=from_json_keep_unrecognized(
-                Color.SERIALIZER, evaluate_string(literal.union.value)
+                Color.serializer, evaluate_string(literal.union.value)
             ),
-            serializer=Color.SERIALIZER,
+            serializer=Color.serializer,
         )
     elif literal.union.kind == "color_from_json_drop_unrecognized":
         return TypedValueType(
             value=from_json_drop_unrecognized(
-                Color.SERIALIZER, evaluate_string(literal.union.value)
+                Color.serializer, evaluate_string(literal.union.value)
             ),
-            serializer=Color.SERIALIZER,
+            serializer=Color.serializer,
         )
     elif literal.union.kind == "color_from_bytes_keep_unrecognized":
         return TypedValueType(
             value=from_bytes_keep_unrecognized(
-                Color.SERIALIZER, evaluate_bytes(literal.union.value)
+                Color.serializer, evaluate_bytes(literal.union.value)
             ),
-            serializer=Color.SERIALIZER,
+            serializer=Color.serializer,
         )
     elif literal.union.kind == "color_from_bytes_drop_unrecognized":
         return TypedValueType(
             value=from_bytes_drop_unrecognized_fields(
-                Color.SERIALIZER, evaluate_bytes(literal.union.value)
+                Color.serializer, evaluate_bytes(literal.union.value)
             ),
-            serializer=Color.SERIALIZER,
+            serializer=Color.serializer,
         )
     elif literal.union.kind == "my_enum_from_json_keep_unrecognized":
         return TypedValueType(
             value=from_json_keep_unrecognized(
-                MyEnum.SERIALIZER, evaluate_string(literal.union.value)
+                MyEnum.serializer, evaluate_string(literal.union.value)
             ),
-            serializer=MyEnum.SERIALIZER,
+            serializer=MyEnum.serializer,
         )
     elif literal.union.kind == "my_enum_from_json_drop_unrecognized":
         return TypedValueType(
             value=from_json_drop_unrecognized(
-                MyEnum.SERIALIZER, evaluate_string(literal.union.value)
+                MyEnum.serializer, evaluate_string(literal.union.value)
             ),
-            serializer=MyEnum.SERIALIZER,
+            serializer=MyEnum.serializer,
         )
     elif literal.union.kind == "my_enum_from_bytes_keep_unrecognized":
         return TypedValueType(
             value=from_bytes_keep_unrecognized(
-                MyEnum.SERIALIZER, evaluate_bytes(literal.union.value)
+                MyEnum.serializer, evaluate_bytes(literal.union.value)
             ),
-            serializer=MyEnum.SERIALIZER,
+            serializer=MyEnum.serializer,
         )
     elif literal.union.kind == "my_enum_from_bytes_drop_unrecognized":
         return TypedValueType(
             value=from_bytes_drop_unrecognized_fields(
-                MyEnum.SERIALIZER, evaluate_bytes(literal.union.value)
+                MyEnum.serializer, evaluate_bytes(literal.union.value)
             ),
-            serializer=MyEnum.SERIALIZER,
+            serializer=MyEnum.serializer,
         )
     elif literal.union.kind == "?":
         raise ValueError("Unknown TypedValue kind")

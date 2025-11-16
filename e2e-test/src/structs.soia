@@ -97,6 +97,8 @@ struct NameCollision {
     struct Mutable {}
     mutable: Mutable;
   }
+
+  serializer: bool;
 }
 
 struct RecA {

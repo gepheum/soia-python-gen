@@ -216,7 +216,7 @@ class PythonModuleCodeGenerator {
     this.pushLine();
     this.pushLine(`DEFAULT: typing.Final["${qualifiedName}"] = _`);
     this.pushLine(
-      `SERIALIZER: typing.Final[soia.Serializer["${qualifiedName}"]] = _`,
+      `serializer: typing.Final[soia.Serializer["${qualifiedName}"]] = _`,
     );
   }
 
@@ -336,7 +336,7 @@ class PythonModuleCodeGenerator {
     }
     this.pushLine();
     this.pushLine(
-      `SERIALIZER: typing.Final[soia.Serializer["${qualifiedName}"]] = _`,
+      `serializer: typing.Final[soia.Serializer["${qualifiedName}"]] = _`,
     );
   }
 
@@ -644,12 +644,12 @@ const PY_LOWER_CASE_KEYWORDS: ReadonlySet<string> = new Set<string>([
 const STRUCT_GEN_LOWER_SYMBOLS: ReadonlySet<string> = new Set<string>([
   "partial",
   "replace",
+  "serializer",
   "to_frozen",
   "to_mutable",
 ]);
 
 /** Name of UPPER_CASE formatted symbols generated in the Python class for an enum. */
 const STRUCT_GEN_UPPER_SYMBOLS: ReadonlySet<string> = new Set<string>([
-  "SERIALIZER",
   "UNKNOWN",
 ]);

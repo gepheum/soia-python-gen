@@ -3,7 +3,7 @@ import unittest
 from soiagen.constants_soia import ONE_CONSTANT
 from soiagen.enums_soia import JsonValue, Weekday
 from soiagen.full_name_soia import FullName
-from soiagen.structs_soia import Color, Foo, Item, Items, Triangle, True_
+from soiagen.structs_soia import Color, Foo, Item, Items, NameCollision, Triangle, True_
 
 
 class SoiagenTestCase(unittest.TestCase):
@@ -12,7 +12,7 @@ class SoiagenTestCase(unittest.TestCase):
         self.assertEqual(full_name.first_name, "Tyler")
         self.assertEqual(full_name.last_name, "Fibonacci")
         self.assertEqual(
-            FullName.SERIALIZER.to_json_code(full_name),
+            FullName.serializer.to_json_code(full_name),
             '["Tyler","Fibonacci"]',
         )
 
@@ -21,7 +21,7 @@ class SoiagenTestCase(unittest.TestCase):
         self.assertEqual(full_name.first_name, "Tyler")
         self.assertEqual(full_name.last_name, "")
         self.assertEqual(
-            FullName.SERIALIZER.to_json_code(full_name),
+            FullName.serializer.to_json_code(full_name),
             '["Tyler"]',
         )
 
@@ -35,7 +35,7 @@ class SoiagenTestCase(unittest.TestCase):
         full_name = FullName.Mutable(first_name="Tyler")
         full_name.last_name = "Fibonacci"
         self.assertEqual(
-            FullName.SERIALIZER.to_json_code(full_name.to_frozen()),
+            FullName.serializer.to_json_code(full_name.to_frozen()),
             '["Tyler","Fibonacci"]',
         )
 
@@ -104,6 +104,10 @@ class SoiagenTestCase(unittest.TestCase):
                 ]
             ),
         )
+
+    def test_name_collision(self):
+        s = NameCollision.partial(serializer_=True)
+        self.assertEqual(s.serializer_, True)
 
     def test_or_mutable_type_is_defined(self):
         _ = FullName.OrMutable
