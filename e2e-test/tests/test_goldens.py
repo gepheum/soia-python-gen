@@ -3,6 +3,7 @@ import unittest
 from dataclasses import dataclass
 from typing import Any, Generic, TypeVar
 
+import soia.reflection
 from soiagen.goldens_soia import (
     UNIT_TESTS,
     Assertion,
@@ -11,12 +12,13 @@ from soiagen.goldens_soia import (
     KeyedArrays,
     MyEnum,
     Point,
+    RecEnum,
+    RecStruct,
     StringExpression,
     TypedValue,
 )
 
 import soia
-import soia.reflection
 
 
 class AssertionError(Exception):
@@ -445,6 +447,16 @@ def evaluate_typed_value(literal: TypedValue) -> TypedValueType[Any]:
         return TypedValueType(
             value=literal.union.value,
             serializer=KeyedArrays.serializer,
+        )
+    elif literal.union.kind == "rec_struct":
+        return TypedValueType(
+            value=literal.union.value,
+            serializer=RecStruct.serializer,
+        )
+    elif literal.union.kind == "rec_enum":
+        return TypedValueType(
+            value=literal.union.value,
+            serializer=RecEnum.serializer,
         )
     elif literal.union.kind == "round_trip_dense_json":
         other = evaluate_typed_value(literal.union.value)
