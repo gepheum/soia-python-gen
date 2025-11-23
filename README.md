@@ -34,7 +34,7 @@ from soiagen.user_soia import TARZAN, User, UserHistory, UserRegistry
 
 ### Struct classes
 
-For every struct `S` in the .soia file, soia generates a frozen/deeply immutable class `S` and a mutable class `S.Mutable`.
+For every struct `S` in the .soia file, soia generates a frozen (deeply immutable) class `S` and a mutable class `S.Mutable`.
 
 #### Frozen struct classes
 
